@@ -1,0 +1,69 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# local agent/test artifacts
+.codex-tmp/
+.playwright-mcp/
+
+# local visual review screenshots kept outside the public repo
+/*.png
+/*.jpg
+/*.jpeg
+/*.webp
+
+# generated concept references, not required for the simple learning app
+assets/images/concepts/
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# private learning materials
+private-content/*
+!private-content/.gitkeep
+
+# never commit original or generated learning media
+*.pdf
+*.zip
+*.mp3
+*.m4a
+*.wav
+*.aac
+
+app-example
+
+# generated native folders
+/ios
+/android
