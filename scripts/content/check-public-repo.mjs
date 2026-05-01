@@ -11,8 +11,8 @@ function getGitFileList(command) {
 
 const trackedFiles = getGitFileList('git ls-files');
 const unignoredFiles = getGitFileList('git ls-files --others --exclude-standard');
-const bannedExtensions = ['.pdf', '.zip', '.mp3', '.m4a', '.wav', '.aac'];
-const bannedPathPrefixes = ['private-content/', '.codex-tmp/', '.playwright-mcp/'];
+const bannedExtensions = ['.pdf', '.zip', '.mp3', '.m4a', '.wav', '.aac', '.key', '.pem', '.p12', '.p8', '.crt', '.cer'];
+const bannedPathPrefixes = ['private-content/', '.codex-tmp/', '.playwright-mcp/', '.local-https/'];
 const bannedRootScreenshotPattern = /^[^/]+\.(png|jpg|jpeg|webp)$/i;
 
 function isBannedRepoFile(file) {

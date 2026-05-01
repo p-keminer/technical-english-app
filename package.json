@@ -14,6 +14,12 @@
     "content:build": "node ./scripts/content/build-private-content.mjs",
     "content:check": "node ./scripts/content/check-private-content.mjs",
     "content:audit-coverage": "node ./scripts/content/audit-exercise-coverage.mjs",
+    "pwa:cert": "node ./scripts/pwa/create-local-https-cert.mjs",
+    "pwa:cert:check": "node ./scripts/pwa/check-local-https.mjs",
+    "pwa:build": "node ./scripts/pwa/build-offline-web.mjs",
+    "pwa:check": "node ./scripts/pwa/check-offline-export.mjs",
+    "pwa:serve": "python ./scripts/serve-dist-preview.py --host 0.0.0.0 --port 8443",
+    "pwa:update": "npm run pwa:cert && npm run pwa:cert:check && npm run pwa:build && npm run pwa:check && npm run pwa:serve",
     "repo:safety": "node ./scripts/content/check-public-repo.mjs",
     "qa": "npm run content:build && npm run content:check && npm run repo:safety && npm run typecheck && npm run lint",
     "qa:routes": "node ./scripts/qa/smoke-routes.mjs"

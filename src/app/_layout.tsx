@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SQLiteProvider } from 'expo-sqlite';
 import { Platform } from 'react-native';
 
+import { PwaServiceWorkerRegistration } from '@/components/pwa-service-worker-registration';
 import { appTheme, palette } from '@/constants/theme';
 import { DATABASE_NAME, initializeDatabaseAsync } from '@/lib/database';
 import { LearningAppProvider } from '@/providers/learning-app-provider';
@@ -27,6 +28,7 @@ export default function RootLayout() {
     return (
       <ThemeProvider value={appTheme}>
         <LearningAppProvider>
+          <PwaServiceWorkerRegistration />
           <StatusBar style="dark" />
           <AppStack />
         </LearningAppProvider>
@@ -38,6 +40,7 @@ export default function RootLayout() {
     <ThemeProvider value={appTheme}>
       <SQLiteProvider databaseName={DATABASE_NAME} onInit={initializeDatabaseAsync}>
         <LearningAppProvider>
+          <PwaServiceWorkerRegistration />
           <StatusBar style="dark" />
           <AppStack />
         </LearningAppProvider>

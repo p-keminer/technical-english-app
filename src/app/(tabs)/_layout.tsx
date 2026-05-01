@@ -38,7 +38,7 @@ export default function ContentLayout() {
         }}
       />
       <Tabs.Screen
-        name="unit"
+        name="unit/index"
         listeners={{
           tabPress: (event) => {
             if (!lastUnitRoute || lastUnitRoute === '/unit') {

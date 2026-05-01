@@ -55,6 +55,38 @@ npm run start
 
 Without local private content, the repo remains a code shell and does not provide the copyrighted course material.
 
+## Local Offline PWA Preview
+
+For a free iPhone home-screen version, this project can create a local PWA export in `dist/`.
+
+On Windows, double-click:
+
+```text
+start-pwa-server.cmd
+```
+
+The script:
+
+- creates a local HTTPS certificate in `.local-https/`
+- rebuilds the local private-content bundle from your local files
+- exports the app for web
+- adds PWA metadata, an app icon, an offline page and a service worker
+- serves `dist/` over HTTPS on your local network, usually on port `8443`
+- also serves the local root certificate over HTTP, usually on port `8091`
+
+First-time iPhone setup:
+
+1. Double-click `start-pwa-server.cmd`.
+2. Open the printed `Certificate install URL` on the iPhone.
+3. Install the downloaded profile in iOS settings.
+4. Enable full trust under `Settings -> General -> About -> Certificate Trust Settings`.
+5. Open the printed HTTPS `LAN URL for phone preview`.
+6. In Safari, use `Share -> Add to Home Screen`.
+
+For later updates, double-click `start-pwa-server.cmd` again, open the HTTPS PWA once on the iPhone and wait for the update to load.
+
+Important iOS limitation: service-worker offline caching requires a secure context. `localhost` works on the same machine, but an iPhone needs HTTPS with a trusted local certificate. The generated `dist/` folder and `.local-https/` certificate files are ignored by Git and may contain private local learning content or machine-specific trust material.
+
 ## Fresh Clone Behavior
 
 If someone clones this repository from GitHub and starts it without private local data, the app opens with a setup notice instead of the real learning units.

@@ -30,6 +30,7 @@ yarn-error.*
 # local agent/test artifacts
 .codex-tmp/
 .playwright-mcp/
+.local-https/
 
 # local visual review screenshots kept outside the public repo
 /*.png
