@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Engineering English Coach",
-    "slug": "engineering-english-coach",
+    "name": "Technical English App",
+    "slug": "technical-english-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

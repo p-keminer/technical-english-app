@@ -38,7 +38,7 @@ export default function StartScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.hero}>
-          <Text style={styles.eyebrow}>Engineering English Coach</Text>
+          <Text style={styles.eyebrow}>Technical English App</Text>
           <Text style={styles.title}>Deine Lernapp</Text>
           <Text style={styles.subtitle}>{unitOverviews.length} Units lokal verfuegbar</Text>
         </View>

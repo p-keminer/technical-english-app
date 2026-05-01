@@ -103,7 +103,7 @@ class CertificateDownloadHandler(SimpleHTTPRequestHandler):
         <li>Link antippen und Profil erlauben.</li>
         <li>iPhone: Einstellungen -> Profil geladen -> Installieren.</li>
         <li>Einstellungen -> Allgemein -> Info -> Zertifikatsvertrauenseinstellungen.</li>
-        <li>Volles Vertrauen fuer "Technical English Coach Local Root CA" aktivieren.</li>
+        <li>Volles Vertrauen fuer "Technical English App Local Root CA" aktivieren.</li>
       </ol>
     </main>
   </body>

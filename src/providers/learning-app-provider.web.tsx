@@ -21,10 +21,36 @@ import type { ExerciseSeed, PrivateContentMeta, ReviewSnapshot, VocabStatus } fr
 
 import { LearningAppContext } from './learning-app-context';
 
-const LAST_UNIT_ROUTE_KEY = 'engineering-english-coach-last-unit-route-v1';
+const LAST_UNIT_ROUTE_KEY = 'technical-english-app-last-unit-route-v1';
+const LAST_UNIT_ROUTE_KEY_SUFFIX = '-last-unit-route-v1';
 
 function emptyReview(): ReviewSnapshot {
   return { exercises: [], vocabItems: [] };
+}
+
+function loadStoredValueWithSuffixMigration(currentKey: string, keySuffix: string) {
+  const currentValue = window.localStorage.getItem(currentKey);
+  if (currentValue) {
+    return currentValue;
+  }
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const candidateKey = window.localStorage.key(index);
+    if (!candidateKey || candidateKey === currentKey || !candidateKey.endsWith(keySuffix)) {
+      continue;
+    }
+
+    const migratedValue = window.localStorage.getItem(candidateKey);
+    if (!migratedValue) {
+      continue;
+    }
+
+    window.localStorage.setItem(currentKey, migratedValue);
+    window.localStorage.removeItem(candidateKey);
+    return migratedValue;
+  }
+
+  return null;
 }
 
 function getInitialLastUnitRoute() {
@@ -32,7 +58,7 @@ function getInitialLastUnitRoute() {
     return null;
   }
 
-  return window.localStorage.getItem(LAST_UNIT_ROUTE_KEY);
+  return loadStoredValueWithSuffixMigration(LAST_UNIT_ROUTE_KEY, LAST_UNIT_ROUTE_KEY_SUFFIX);
 }
 
 export function LearningAppProvider({ children }: { children: React.ReactNode }) {

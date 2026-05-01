@@ -3,7 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { getPrivateContentMeta, getPrivateSeedBundles, privateContentIsAvailable } from '@/lib/private-content';
 import type { ExerciseSeed, UnitSeedBundle, VocabStatus } from '@/types/content';
 
-export const DATABASE_NAME = 'engineering-english-coach.db';
+export const DATABASE_NAME = 'technical-english-app.db';
 
 function json(value: unknown) {
   return JSON.stringify(value);

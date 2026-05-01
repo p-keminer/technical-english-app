@@ -16,6 +16,10 @@ const serverCsrPath = path.join(certDir, 'server.csr');
 const serverCrtPath = path.join(certDir, 'server.crt');
 const serverConfigPath = path.join(certDir, 'server-openssl.cnf');
 const serverExtPath = path.join(certDir, 'server-ext.cnf');
+const appName = 'Technical English App';
+const rootCaCommonName = `${appName} Local Root CA`;
+const serverCommonName = `${appName} Local PWA`;
+const payloadIdentifierBase = 'de.local.technical-english-app.root-ca';
 
 function parseArgs(argv) {
   const args = {};
@@ -50,6 +54,21 @@ function runOpenSsl(args) {
   });
 }
 
+function readCertificateSubject(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return '';
+  }
+
+  try {
+    return execFileSync('openssl', ['x509', '-in', filePath, '-noout', '-subject', '-nameopt', 'RFC2253'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+  } catch {
+    return '';
+  }
+}
+
 function formatBase64ForPlist(base64) {
   return base64.match(/.{1,64}/g)?.join('\n') ?? base64;
 }
@@ -70,17 +89,17 @@ function writeRootMobileConfig() {
   <array>
     <dict>
       <key>PayloadCertificateFileName</key>
-      <string>technical-english-coach-root-ca.cer</string>
+      <string>technical-english-app-root-ca.cer</string>
       <key>PayloadContent</key>
       <data>
 ${rootDerBase64}
       </data>
       <key>PayloadDescription</key>
-      <string>Installs the local HTTPS root certificate for the Technical English Coach PWA.</string>
+      <string>Installs the local HTTPS root certificate for the Technical English App PWA.</string>
       <key>PayloadDisplayName</key>
-      <string>Technical English Coach Local Root CA</string>
+      <string>${rootCaCommonName}</string>
       <key>PayloadIdentifier</key>
-      <string>de.local.technical-english-coach.root-ca.certificate</string>
+      <string>${payloadIdentifierBase}.certificate</string>
       <key>PayloadType</key>
       <string>com.apple.security.root</string>
       <key>PayloadUUID</key>
@@ -90,11 +109,11 @@ ${rootDerBase64}
     </dict>
   </array>
   <key>PayloadDescription</key>
-  <string>Allows this iPhone to trust the local HTTPS server used for the offline Technical English Coach PWA.</string>
+  <string>Allows this iPhone to trust the local HTTPS server used for the offline Technical English App PWA.</string>
   <key>PayloadDisplayName</key>
-  <string>Technical English Coach Local PWA Certificate</string>
+  <string>${appName} Local PWA Certificate</string>
   <key>PayloadIdentifier</key>
-  <string>de.local.technical-english-coach.root-ca</string>
+  <string>${payloadIdentifierBase}</string>
   <key>PayloadOrganization</key>
   <string>Local Development</string>
   <key>PayloadRemovalDisallowed</key>
@@ -129,7 +148,7 @@ distinguished_name = dn
 req_extensions = req_ext
 
 [dn]
-CN = Technical English Coach Local PWA
+CN = ${serverCommonName}
 O = Local Development
 
 [req_ext]
@@ -163,7 +182,11 @@ const force = Boolean(args.force);
 fs.mkdirSync(certDir, { recursive: true });
 writeServerConfig(lanIp);
 
-if (force || !fs.existsSync(rootKeyPath) || !fs.existsSync(rootPemPath)) {
+const rootSubject = readCertificateSubject(rootPemPath);
+const shouldCreateRoot =
+  force || !fs.existsSync(rootKeyPath) || !fs.existsSync(rootPemPath) || !rootSubject.includes(`CN=${rootCaCommonName}`);
+
+if (shouldCreateRoot) {
   runOpenSsl([
     'req',
     '-x509',
@@ -179,7 +202,7 @@ if (force || !fs.existsSync(rootKeyPath) || !fs.existsSync(rootPemPath)) {
     '-out',
     rootPemPath,
     '-subj',
-    '/CN=Technical English Coach Local Root CA/O=Local Development',
+    `/CN=${rootCaCommonName}/O=Local Development`,
   ]);
 }
 

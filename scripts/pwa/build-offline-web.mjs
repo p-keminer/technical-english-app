@@ -7,7 +7,7 @@ const distRoot = path.join(repoRoot, 'dist');
 const runtimePath = path.join(repoRoot, 'src', 'private-content', 'runtime.ts');
 const originalRuntimeSource = fs.existsSync(runtimePath) ? fs.readFileSync(runtimePath, 'utf8') : null;
 
-const pwaName = 'Technical English Coach';
+const pwaName = 'Technical English App';
 const themeColor = '#0E223D';
 const backgroundColor = '#F4E1C1';
 
@@ -45,7 +45,7 @@ function copyPwaIcon() {
 function writeManifest() {
   const manifest = {
     name: pwaName,
-    short_name: 'English Coach',
+    short_name: 'English App',
     description: 'Offline-faehige lokale Lernapp fuer Technical English.',
     start_url: '/',
     scope: '/',
@@ -141,7 +141,7 @@ function writeServiceWorker() {
   const uniqueUrls = ['/', ...urls].filter((url, index, allUrls) => allUrls.indexOf(url) === index);
   const cacheVersion = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
 
-  const source = `const CACHE_NAME = 'technical-english-coach-${cacheVersion}';
+  const source = `const CACHE_NAME = 'technical-english-app-${cacheVersion}';
 const PRECACHE_URLS = ${JSON.stringify(uniqueUrls, null, 2)};
 
 self.addEventListener('install', (event) => {

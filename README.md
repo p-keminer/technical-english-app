@@ -1,4 +1,4 @@
-# Technical English Coach
+# Technical English App
 
 ## Deutsche Version
 

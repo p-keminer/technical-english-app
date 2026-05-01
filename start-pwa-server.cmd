@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0"
 
 echo.
-echo === Technical English Coach: Offline-PWA aktualisieren ===
+echo === Technical English App: Offline-PWA aktualisieren ===
 echo.
 echo 1/4 Erzeuge lokales HTTPS-Zertifikat fuer dieses WLAN.
 call npm run pwa:cert

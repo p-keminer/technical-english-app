@@ -12,7 +12,8 @@ import type {
   VocabStatus,
 } from '@/types/content';
 
-const STORAGE_KEY = 'engineering-english-coach-web-progress-v1';
+const STORAGE_KEY = 'technical-english-app-web-progress-v1';
+const STORAGE_KEY_SUFFIX = '-web-progress-v1';
 
 type WebProgressState = {
   exerciseResults: Record<string, ExerciseResult>;
@@ -30,6 +31,31 @@ type StoredProgress = {
 
 function normalizeBundles(bundles: UnitSeedBundle | UnitSeedBundle[]) {
   return Array.isArray(bundles) ? bundles : [bundles];
+}
+
+function loadStoredValueWithSuffixMigration(currentKey: string, keySuffix: string) {
+  const currentValue = window.localStorage.getItem(currentKey);
+  if (currentValue) {
+    return currentValue;
+  }
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const candidateKey = window.localStorage.key(index);
+    if (!candidateKey || candidateKey === currentKey || !candidateKey.endsWith(keySuffix)) {
+      continue;
+    }
+
+    const migratedValue = window.localStorage.getItem(candidateKey);
+    if (!migratedValue) {
+      continue;
+    }
+
+    window.localStorage.setItem(currentKey, migratedValue);
+    window.localStorage.removeItem(candidateKey);
+    return migratedValue;
+  }
+
+  return null;
 }
 
 function getUnitSortNumber(unitId: string) {
@@ -94,7 +120,7 @@ export function loadWebProgress(bundles: UnitSeedBundle | UnitSeedBundle[]): Web
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = loadStoredValueWithSuffixMigration(STORAGE_KEY, STORAGE_KEY_SUFFIX);
     if (!raw) {
       return createInitialWebProgress(bundles);
     }
