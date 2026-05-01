@@ -85,8 +85,12 @@ Ersteinrichtung auf dem iPhone:
 5. Volles Vertrauen unter `Einstellungen -> Allgemein -> Info -> Zertifikatsvertrauenseinstellungen` aktivieren.
 6. Die angezeigte HTTPS-`LAN URL for phone preview` oeffnen.
 7. In Safari `Teilen -> Zum Home-Bildschirm` verwenden.
+8. Die neue Homescreen-App einmal direkt mit laufendem Server und aktivem WLAN oeffnen.
+9. Warten, bis die Startseite geladen ist. Danach kann der Flugmodus-/Offline-Test gemacht werden.
 
 Wenn `Zertifikatsvertrauenseinstellungen` nur Trust-Store-Versionen zeigt, wurde das Profil noch nicht erfolgreich installiert. Oeffne die Zertifikats-URL erneut und pruefe, ob das `.mobileconfig`-Profil unter `VPN & Geraeteverwaltung` erscheint.
+
+Wenn die Homescreen-App offline nur `Safari kann die Seite nicht oeffnen` zeigt, wurde sie wahrscheinlich angelegt, bevor der Service Worker fertig installiert war. Loesung: Server starten, iPhone wieder ins WLAN, Homescreen-App einmal online oeffnen und kurz warten. Falls das nicht reicht, die Homescreen-App loeschen, die HTTPS-URL in Safari neu oeffnen und erneut `Zum Home-Bildschirm` ausfuehren.
 
 Fuer spaetere Updates: `start-pwa-server.cmd` erneut doppelklicken, die HTTPS-PWA einmal auf dem iPhone oeffnen und kurz warten, bis die neue Version geladen wurde.
 
@@ -231,8 +235,12 @@ First-time iPhone setup:
 5. Enable full trust under `Settings -> General -> About -> Certificate Trust Settings`.
 6. Open the printed HTTPS `LAN URL for phone preview`.
 7. In Safari, use `Share -> Add to Home Screen`.
+8. Open the new home-screen app once while the server is still running and Wi-Fi is active.
+9. Wait until the start screen has loaded. After that, you can test airplane/offline mode.
 
 If `Certificate Trust Settings` only shows trust-store versions, the profile was not installed successfully yet. Reopen the certificate install URL and make sure the `.mobileconfig` profile appears under `VPN & Device Management`.
+
+If the home-screen app only shows `Safari cannot open the page` while offline, it was probably added before the service worker finished installing. Fix: start the server, put the iPhone back on Wi-Fi, open the home-screen app once online and wait briefly. If that is not enough, remove the home-screen app, open the HTTPS URL in Safari again and run `Add to Home Screen` again.
 
 For later updates, double-click `start-pwa-server.cmd` again, open the HTTPS PWA once on the iPhone and wait for the update to load.
 

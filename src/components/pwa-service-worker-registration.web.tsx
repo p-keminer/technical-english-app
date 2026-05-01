@@ -12,20 +12,20 @@ export function PwaServiceWorkerRegistration() {
     }
 
     const register = () => {
-      navigator.serviceWorker.register('/sw.js').catch((error) => {
+      navigator.serviceWorker.register('/sw.js').then(() => {
+        navigator.serviceWorker.ready
+          .then((registration) => {
+            registration.active?.postMessage({ type: 'CACHE_BACKGROUND_URLS' });
+          })
+          .catch((error) => {
+            console.warn('Service worker readiness check failed.', error);
+          });
+      }).catch((error) => {
         console.warn('Service worker registration failed.', error);
       });
     };
 
-    if (document.readyState === 'complete') {
-      register();
-      return;
-    }
-
-    window.addEventListener('load', register);
-    return () => {
-      window.removeEventListener('load', register);
-    };
+    register();
   }, []);
 
   return null;

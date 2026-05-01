@@ -139,15 +139,34 @@ function writeServiceWorker() {
     .sort();
 
   const uniqueUrls = ['/', ...urls].filter((url, index, allUrls) => allUrls.indexOf(url) === index);
+  const backgroundUrls = uniqueUrls.filter((url) => /\.(mp3|wasm)$/i.test(url));
+  const coreUrls = uniqueUrls.filter((url) => !backgroundUrls.includes(url));
   const cacheVersion = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
 
-  const source = `const CACHE_NAME = 'technical-english-app-${cacheVersion}';
-const PRECACHE_URLS = ${JSON.stringify(uniqueUrls, null, 2)};
+  const source = `const CORE_CACHE_NAME = 'technical-english-app-core-${cacheVersion}';
+const ASSET_CACHE_NAME = 'technical-english-app-assets-${cacheVersion}';
+const CACHE_NAMES = [CORE_CACHE_NAME, ASSET_CACHE_NAME];
+const PRECACHE_URLS = ${JSON.stringify(coreUrls, null, 2)};
+const BACKGROUND_URLS = ${JSON.stringify(backgroundUrls, null, 2)};
+
+let backgroundCachePromise = null;
+
+function cacheBackgroundUrls() {
+  if (BACKGROUND_URLS.length === 0) {
+    return Promise.resolve([]);
+  }
+
+  backgroundCachePromise ??= caches.open(ASSET_CACHE_NAME).then((cache) =>
+    Promise.allSettled(BACKGROUND_URLS.map((url) => cache.add(url)))
+  );
+
+  return backgroundCachePromise;
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
-      .open(CACHE_NAME)
+      .open(CORE_CACHE_NAME)
       .then((cache) => cache.addAll(PRECACHE_URLS))
       .then(() => self.skipWaiting())
   );
@@ -158,10 +177,20 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((cacheNames) =>
-        Promise.all(cacheNames.filter((cacheName) => cacheName !== CACHE_NAME).map((cacheName) => caches.delete(cacheName)))
+        Promise.all(
+          cacheNames
+            .filter((cacheName) => cacheName.startsWith('technical-english-') && !CACHE_NAMES.includes(cacheName))
+            .map((cacheName) => caches.delete(cacheName))
+        )
       )
       .then(() => self.clients.claim())
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'CACHE_BACKGROUND_URLS') {
+    event.waitUntil(cacheBackgroundUrls());
+  }
 });
 
 self.addEventListener('fetch', (event) => {
