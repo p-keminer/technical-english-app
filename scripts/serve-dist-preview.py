@@ -17,9 +17,11 @@ DEFAULT_CERT_DOWNLOAD_PORT = 8091
 
 mimetypes.add_type("application/manifest+json", ".webmanifest")
 mimetypes.add_type("application/x-x509-ca-cert", ".cer")
+mimetypes.add_type("application/x-apple-aspen-config", ".mobileconfig")
 SimpleHTTPRequestHandler.extensions_map[".webmanifest"] = "application/manifest+json"
 SimpleHTTPRequestHandler.extensions_map[".wasm"] = "application/wasm"
 SimpleHTTPRequestHandler.extensions_map[".cer"] = "application/x-x509-ca-cert"
+SimpleHTTPRequestHandler.extensions_map[".mobileconfig"] = "application/x-apple-aspen-config"
 
 
 def get_lan_ip() -> str:
@@ -60,12 +62,17 @@ class DistPreviewHandler(SimpleHTTPRequestHandler):
 
 
 class CertificateDownloadHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, root_ca_file: Path, **kwargs):
+    def __init__(self, *args, root_ca_file: Path, root_profile_file: Path, **kwargs):
         self.root_ca_file = root_ca_file
-        super().__init__(*args, directory=str(root_ca_file.parent), **kwargs)
+        self.root_profile_file = root_profile_file
+        super().__init__(*args, directory=str(root_profile_file.parent), **kwargs)
 
     def do_GET(self):
         parsed_path = urlparse(self.path).path
+        if parsed_path == "/local-root-ca.mobileconfig":
+            self.path = f"/{self.root_profile_file.name}"
+            return super().do_GET()
+
         if parsed_path == "/local-root-ca.cer":
             self.path = f"/{self.root_ca_file.name}"
             return super().do_GET()
@@ -90,8 +97,8 @@ class CertificateDownloadHandler(SimpleHTTPRequestHandler):
   <body>
     <main>
       <h1>Lokales Zertifikat installieren</h1>
-      <p>Installiere dieses Zertifikat einmal auf dem iPhone und aktiviere danach volles Vertrauen.</p>
-      <p><a href=\"/local-root-ca.cer\">local-root-ca.cer herunterladen</a></p>
+      <p>Installiere dieses Profil einmal auf dem iPhone und aktiviere danach volles Vertrauen.</p>
+      <p><a href=\"/local-root-ca.mobileconfig\">local-root-ca.mobileconfig herunterladen</a></p>
       <ol>
         <li>Link antippen und Profil erlauben.</li>
         <li>iPhone: Einstellungen -> Profil geladen -> Installieren.</li>
@@ -104,9 +111,9 @@ class CertificateDownloadHandler(SimpleHTTPRequestHandler):
         )
 
 
-def start_certificate_server(root_ca_file: Path, host: str, port: int) -> ThreadingHTTPServer:
+def start_certificate_server(root_ca_file: Path, root_profile_file: Path, host: str, port: int) -> ThreadingHTTPServer:
     def handler(*args, **kwargs):
-        return CertificateDownloadHandler(*args, root_ca_file=root_ca_file, **kwargs)
+        return CertificateDownloadHandler(*args, root_ca_file=root_ca_file, root_profile_file=root_profile_file, **kwargs)
 
     server = ThreadingHTTPServer((host, port), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -121,6 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("--cert-file", default=str(CERT_ROOT / "server.crt"))
     parser.add_argument("--key-file", default=str(CERT_ROOT / "server.key"))
     parser.add_argument("--root-ca-file", default=str(CERT_ROOT / "rootCA.cer"))
+    parser.add_argument("--root-profile-file", default=str(CERT_ROOT / "rootCA.mobileconfig"))
     parser.add_argument("--cert-download-port", type=int, default=DEFAULT_CERT_DOWNLOAD_PORT)
     parser.add_argument("--http-only", action="store_true")
     args = parser.parse_args()
@@ -135,6 +143,7 @@ if __name__ == "__main__":
     cert_file = Path(args.cert_file)
     key_file = Path(args.key_file)
     root_ca_file = Path(args.root_ca_file)
+    root_profile_file = Path(args.root_profile_file)
 
     if not args.http_only:
         if not cert_file.exists() or not key_file.exists():
@@ -147,8 +156,8 @@ if __name__ == "__main__":
         server.socket = context.wrap_socket(server.socket, server_side=True)
         scheme = "https"
 
-        if root_ca_file.exists() and args.cert_download_port:
-            start_certificate_server(root_ca_file, args.host, args.cert_download_port)
+        if root_ca_file.exists() and root_profile_file.exists() and args.cert_download_port:
+            start_certificate_server(root_ca_file, root_profile_file, args.host, args.cert_download_port)
             print(f"Certificate install URL: http://{lan_ip}:{args.cert_download_port}")
             print("After installing, enable full trust on iPhone before opening the HTTPS PWA URL.")
 

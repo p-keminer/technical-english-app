@@ -78,10 +78,13 @@ First-time iPhone setup:
 
 1. Double-click `start-pwa-server.cmd`.
 2. Open the printed `Certificate install URL` on the iPhone.
-3. Install the downloaded profile in iOS settings.
-4. Enable full trust under `Settings -> General -> About -> Certificate Trust Settings`.
-5. Open the printed HTTPS `LAN URL for phone preview`.
-6. In Safari, use `Share -> Add to Home Screen`.
+3. Download `local-root-ca.mobileconfig`.
+4. Install the downloaded profile under `Settings -> General -> VPN & Device Management`.
+5. Enable full trust under `Settings -> General -> About -> Certificate Trust Settings`.
+6. Open the printed HTTPS `LAN URL for phone preview`.
+7. In Safari, use `Share -> Add to Home Screen`.
+
+If `Certificate Trust Settings` only shows trust-store versions, the profile was not installed successfully yet. Reopen the certificate install URL and make sure the `.mobileconfig` profile appears under `VPN & Device Management`.
 
 For later updates, double-click `start-pwa-server.cmd` again, open the HTTPS PWA once on the iPhone and wait for the update to load.
 

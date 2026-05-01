@@ -5,7 +5,7 @@ import path from 'path';
 
 const repoRoot = process.cwd();
 const certDir = path.join(repoRoot, '.local-https');
-const requiredFiles = ['rootCA.pem', 'rootCA.cer', 'server.crt', 'server.key'];
+const requiredFiles = ['rootCA.pem', 'rootCA.cer', 'rootCA.der', 'rootCA.mobileconfig', 'server.crt', 'server.key'];
 
 function getLanIp() {
   const networkInterfaces = os.networkInterfaces();
@@ -47,6 +47,21 @@ if (lanIp) {
 for (const expectedSan of expectedSans) {
   if (!certText.includes(expectedSan)) {
     throw new Error(`Server certificate is missing required SAN: ${expectedSan}`);
+  }
+}
+
+const rootText = execFileSync('openssl', ['x509', '-in', path.join(certDir, 'rootCA.pem'), '-noout', '-text'], {
+  encoding: 'utf8',
+});
+
+if (!rootText.includes('CA:TRUE')) {
+  throw new Error('Root certificate is not marked as a CA root certificate.');
+}
+
+const mobileConfig = fs.readFileSync(path.join(certDir, 'rootCA.mobileconfig'), 'utf8');
+for (const expectedSnippet of ['com.apple.security.root', '<key>PayloadContent</key>', '<data>']) {
+  if (!mobileConfig.includes(expectedSnippet)) {
+    throw new Error(`Root mobileconfig is missing expected snippet: ${expectedSnippet}`);
   }
 }
 

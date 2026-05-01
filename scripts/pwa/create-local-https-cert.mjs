@@ -1,4 +1,5 @@
 import { execFileSync } from 'child_process';
+import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -8,6 +9,8 @@ const certDir = path.join(repoRoot, '.local-https');
 const rootKeyPath = path.join(certDir, 'rootCA.key');
 const rootPemPath = path.join(certDir, 'rootCA.pem');
 const rootCerPath = path.join(certDir, 'rootCA.cer');
+const rootDerPath = path.join(certDir, 'rootCA.der');
+const rootMobileConfigPath = path.join(certDir, 'rootCA.mobileconfig');
 const serverKeyPath = path.join(certDir, 'server.key');
 const serverCsrPath = path.join(certDir, 'server.csr');
 const serverCrtPath = path.join(certDir, 'server.crt');
@@ -45,6 +48,68 @@ function runOpenSsl(args) {
     cwd: certDir,
     stdio: 'inherit',
   });
+}
+
+function formatBase64ForPlist(base64) {
+  return base64.match(/.{1,64}/g)?.join('\n') ?? base64;
+}
+
+function writeRootMobileConfig() {
+  runOpenSsl(['x509', '-in', rootPemPath, '-outform', 'der', '-out', rootDerPath]);
+  const rootDerBase64 = formatBase64ForPlist(fs.readFileSync(rootDerPath).toString('base64'));
+  const profileUuid = crypto.randomUUID().toUpperCase();
+  const payloadUuid = crypto.randomUUID().toUpperCase();
+
+  fs.writeFileSync(
+    rootMobileConfigPath,
+    `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>PayloadCertificateFileName</key>
+      <string>technical-english-coach-root-ca.cer</string>
+      <key>PayloadContent</key>
+      <data>
+${rootDerBase64}
+      </data>
+      <key>PayloadDescription</key>
+      <string>Installs the local HTTPS root certificate for the Technical English Coach PWA.</string>
+      <key>PayloadDisplayName</key>
+      <string>Technical English Coach Local Root CA</string>
+      <key>PayloadIdentifier</key>
+      <string>de.local.technical-english-coach.root-ca.certificate</string>
+      <key>PayloadType</key>
+      <string>com.apple.security.root</string>
+      <key>PayloadUUID</key>
+      <string>${payloadUuid}</string>
+      <key>PayloadVersion</key>
+      <integer>1</integer>
+    </dict>
+  </array>
+  <key>PayloadDescription</key>
+  <string>Allows this iPhone to trust the local HTTPS server used for the offline Technical English Coach PWA.</string>
+  <key>PayloadDisplayName</key>
+  <string>Technical English Coach Local PWA Certificate</string>
+  <key>PayloadIdentifier</key>
+  <string>de.local.technical-english-coach.root-ca</string>
+  <key>PayloadOrganization</key>
+  <string>Local Development</string>
+  <key>PayloadRemovalDisallowed</key>
+  <false/>
+  <key>PayloadType</key>
+  <string>Configuration</string>
+  <key>PayloadUUID</key>
+  <string>${profileUuid}</string>
+  <key>PayloadVersion</key>
+  <integer>1</integer>
+</dict>
+</plist>
+`,
+    'utf8'
+  );
 }
 
 function writeServerConfig(lanIp) {
@@ -119,6 +184,7 @@ if (force || !fs.existsSync(rootKeyPath) || !fs.existsSync(rootPemPath)) {
 }
 
 fs.copyFileSync(rootPemPath, rootCerPath);
+writeRootMobileConfig();
 
 runOpenSsl(['genrsa', '-out', serverKeyPath, '2048']);
 runOpenSsl(['req', '-new', '-key', serverKeyPath, '-out', serverCsrPath, '-config', serverConfigPath]);
@@ -142,5 +208,5 @@ runOpenSsl([
 ]);
 
 console.log(`Local HTTPS certificate ready for ${lanIp}`);
-console.log(`Root certificate for iPhone: ${rootCerPath}`);
+console.log(`Root profile for iPhone: ${rootMobileConfigPath}`);
 console.log(`Server certificate: ${serverCrtPath}`);
